@@ -49,6 +49,9 @@ constexpr uint8_t kPinPulse1P1 = A1;
 
 constexpr uint8_t kIntialSize = 10;
 
+// set true is when the interrupt is triggered
+// extern volatile bool m_fInterrupt;
+
 static inline void boostPowerOn(void)
     {
     pinMode(kBoosterPowerOn, OUTPUT);
@@ -307,7 +310,8 @@ private:
     void updateLightMeasurements();
     void resetMeasurements();
     static void measureTotalizer();
-    void resizeArray(int* buf, uint64_t bufSize);
+    void resizeArray(uint32_t* buf, uint64_t bufSize);
+    void resizeArray(uint16_t* buf, uint64_t bufSize);
 
     // function for scaling pulse data
     static uint16_t dNdT_getFrac(uint32_t deltaC,uint32_t delta_ms);
@@ -397,8 +401,6 @@ private:
     bool                            m_fHardError: 1;
     // set true is the contact sensor is present
     bool                            m_fPulse1: 1;
-    // set true is when the interrupt is triggered
-    volatile bool                   m_fInterrupt: 1;
 
 
     // set true while a transmit is pending.

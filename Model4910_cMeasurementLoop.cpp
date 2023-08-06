@@ -20,6 +20,7 @@ Author:
 
 using namespace McciModel4910;
 using namespace McciCatena;
+volatile bool m_fInterrupt;
 
 /****************************************************************************\
 |
@@ -149,7 +150,7 @@ uint16_t cMeasurementLoop::dNdT_getFrac(uint32_t deltaC,uint32_t delta_ms)
 
 void cMeasurementLoop::measureTotalizer()
     {
-    this->m_fInterrupt = true;
+    m_fInterrupt = true;
     }
 
 // Function to set up interrupts
@@ -164,18 +165,23 @@ void cMeasurementLoop::disableInterrupts()
     detachInterrupt(digitalPinToInterrupt(kPinPulse1P1));
     }
 
-void cMeasurementLoop::resizeArray(int* buf, uint64_t bufSize)
+void cMeasurementLoop::resizeArray(uint16_t* buf, uint64_t bufSize)
+    {
+    this->resizeArray((uint32_t*)buf, bufSize);
+    }
+
+void cMeasurementLoop::resizeArray(uint32_t* buf, uint64_t bufSize)
     {
     size_t new_size = bufSize * 2;
-    int* newDataStorage = new int[new_size];
+    uint32_t* newDataStorage = new uint32_t[new_size];
     for (size_t i = 0; i < bufSize; i++)
         {
         newDataStorage[i] = buf[i];
         }
 
     bufSize = new_size;
-    delete[] buf[bufSize];
-    buf[bufSize] = newDataStorage;
+    delete[] buf;
+    buf = newDataStorage;
     }
 
 cMeasurementLoop::State
@@ -233,6 +239,15 @@ cMeasurementLoop::fsmDispatch(
             newState = State::stMeasure;
         else if (this->m_UplinkTimer.getRemaining() > 1500)
             {
+            this->pulse1InBufSize = kIntialSize;
+            this->pulse1OutBufSize = kIntialSize;
+            this->fracPulse1InBufSize = kIntialSize;
+            this->fracPulse1OutBufSize = kIntialSize;
+            this->pulse1InBufIndex = 0;
+            this->pulse1OutBufIndex = 0;
+            this->fracPulse1InBufIndex = 0;
+            this->fracPulse1OutBufIndex = 0;
+
             this->setupInterrupts();
             this->sleep();
             }
@@ -518,15 +533,16 @@ void cMeasurementLoop::poll()
         fEvent = true;
         }
 
-    if (this->m_fInterrupt == true && this->m_fPulse1 == true)
+    if (m_fInterrupt == true && this->m_fPulse1 == true)
         {
-        this->m_fInterrupt = false;
+        m_fInterrupt = false;
         if (this->pulse1InBufIndex >= this->pulse1InBufSize)
             {
             this->resizeArray(this->m_data.pulse.Pulse1in, this->pulse1InBufSize);
             }
 
-        this->m_data.pulse.Pulse1in[this->pulse1InBufIndex++] = this->m_Pulse1P1.getcurrent();
+        this->m_data.pulse.Pulse1in[this->pulse1InBufIndex] = this->m_Pulse1P1.getcurrent();
+        this->pulse1InBufIndex += 1;
         this->m_Pulse1P1.getDeltaCountAndTime(this->pulse1in_dc, this->pulse1in_dt);
         this->m_Pulse1P1.setReference();
 
@@ -535,7 +551,8 @@ void cMeasurementLoop::poll()
             this->resizeArray(this->m_data.pulse.Pulse1out, this->pulse1OutBufSize);
             }
 
-        this->m_data.pulse.Pulse1out[this->pulse1OutBufIndex++] = 0;
+        this->m_data.pulse.Pulse1out[this->pulse1OutBufIndex] = 0;
+        this->pulse1OutBufIndex += 1;
         this->pulse1out_dc = 0;
         this->pulse1out_dt = this->pulse1in_dt;
 
@@ -545,13 +562,15 @@ void cMeasurementLoop::poll()
             {
             this->resizeArray(this->m_data.pulse.FracPulse1In, this->fracPulse1InBufSize);
             }
-        m_data.pulse.FracPulse1In = this->dNdT_getFrac(this->pulse1in_dc, this->pulse1in_dt);
+        m_data.pulse.FracPulse1In[this->fracPulse1InBufIndex] = this->dNdT_getFrac(this->pulse1in_dc, this->pulse1in_dt);
+        this->fracPulse1InBufIndex += 1;
 
         if (this->fracPulse1OutBufIndex >= this->fracPulse1OutBufSize)
             {
             this->resizeArray(this->m_data.pulse.FracPulse1Out, this->fracPulse1OutBufSize);
             }
-        m_data.pulse.FracPulse1Out = this->dNdT_getFrac(this->pulse1out_dc, this->pulse1out_dt);
+        m_data.pulse.FracPulse1Out[this->fracPulse1OutBufIndex] = this->dNdT_getFrac(this->pulse1out_dc, this->pulse1out_dt);
+        this->fracPulse1OutBufIndex += 1;
 
         this->m_data.flags |= Flags::PulsesPerHour;
 

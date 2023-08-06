@@ -110,34 +110,68 @@ cMeasurementLoop::fillTxBuffer(
     if ((this->m_data.flags & Flags::WattHours) != Flags(0))
         {
         gCatena.SafePrintf(
-            "Pulses:   Pin1: "
+            "Pulses:    Pin1: "
             );
-        for (size_t i = 0; i < pulse1InBufIndex; i++)
+        for (size_t i = 0; i < this->pulse1InBufIndex; i++)
             {
-
+            gCatena.SafePrintf(
+                "%u, ",
+                mData.pulse.Pulse1in[this->pulse1InBufIndex]
+                );
             }
         gCatena.SafePrintf(
-            "Pulses:   Pin1: %u Pin2: %u\n",
-            mData.pulse.Pulse1in,
-            mData.pulse.Pulse1out
+            "\nPulses:    Pin2: "
+            );
+        for (size_t i = 0; i < this->pulse1OutBufIndex; i++)
+            {
+            gCatena.SafePrintf(
+                "%u, ",
+                mData.pulse.Pulse1out[this->pulse1OutBufIndex]
+                );
+            }
+
+        gCatena.SafePrintf(
+            "\n"
             );
 
-        b.putWH(mData.pulse.Pulse1in);
-        b.putWH(mData.pulse.Pulse1out);
+        b.putWH(mData.pulse.Pulse1in[this->pulse1InBufIndex]);
+        b.putWH(mData.pulse.Pulse1out[this->pulse1OutBufIndex]);
         }
 
     if ((this->m_data.flags & Flags::PulsesPerHour) != Flags(0))
         {
         gCatena.SafePrintf(
-            "Power:   IN: %u/%u (%04x) OUT: %u/%u (%04x)\n",
-            this->pulse1in_dc, this->pulse1in_dt,
-            mData.pulse.FracPulse1In,
-            this->pulse1out_dc, this->pulse1out_dt,
-            mData.pulse.FracPulse1Out
+            "Power:   IN: %u/%u ",
+            this->pulse1in_dc,
+            this->pulse1in_dt);
+
+        for (size_t i = 0; i < this->fracPulse1InBufIndex; i++)
+            {
+            gCatena.SafePrintf(
+                "%04x, ",
+                mData.pulse.FracPulse1In[this->fracPulse1InBufIndex]
+                );
+            }
+
+        gCatena.SafePrintf(
+            "\n"
             );
 
-        b.putPulseFraction(mData.pulse.FracPulse1In);
-        b.putPulseFraction(mData.pulse.FracPulse1Out);
+        gCatena.SafePrintf(
+            "Power:   OUT: %u/%u ",
+            this->pulse1out_dc,
+            this->pulse1out_dt);
+
+        for (size_t i = 0; i < this->fracPulse1OutBufIndex; i++)
+            {
+            gCatena.SafePrintf(
+                "%04x, ",
+                mData.pulse.FracPulse1Out[this->fracPulse1OutBufIndex]
+                );
+            }
+
+        b.putPulseFraction(mData.pulse.FracPulse1In[this->fracPulse1InBufIndex]);
+        b.putPulseFraction(mData.pulse.FracPulse1Out[this->fracPulse1OutBufIndex]);
         }
     gLed.Set(McciCatena::LedPattern::Off);
     }

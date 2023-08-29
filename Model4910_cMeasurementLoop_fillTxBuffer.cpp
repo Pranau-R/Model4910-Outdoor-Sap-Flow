@@ -110,7 +110,7 @@ cMeasurementLoop::fillTxBuffer(
     if ((this->m_data.flags & Flags::WattHours) != Flags(0))
         {
         gCatena.SafePrintf(
-            "Pulses:    Pin1: "
+            "Pulses:  Pin1: "
             );
         for (size_t i = 0; i < this->pulse1InBufIndex; i++)
             {
@@ -120,7 +120,7 @@ cMeasurementLoop::fillTxBuffer(
                 );
             }
         gCatena.SafePrintf(
-            "\nPulses:    Pin2: "
+            "\nPulses:  Pin2: "
             );
         for (size_t i = 0; i < this->pulse1OutBufIndex; i++)
             {
@@ -169,6 +169,10 @@ cMeasurementLoop::fillTxBuffer(
                 mData.pulse.FracPulse1Out[this->fracPulse1OutBufIndex]
                 );
             }
+
+         gCatena.SafePrintf(
+             "\n"
+             );
 
         b.putPulseFraction(mData.pulse.FracPulse1In[this->fracPulse1InBufIndex]);
         b.putPulseFraction(mData.pulse.FracPulse1Out[this->fracPulse1OutBufIndex]);

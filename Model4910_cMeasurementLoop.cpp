@@ -76,6 +76,7 @@ void cMeasurementLoop::begin()
         this->pulse1OutBufIndex = 0;
         this->fracPulse1InBufIndex = 0;
         this->fracPulse1OutBufIndex = 0;
+        this->interrupCounter = 0;
 
         this->m_fPulse1 = true;
         gCatena.SafePrintf("Pulse totalization started\n");
@@ -247,6 +248,7 @@ cMeasurementLoop::fsmDispatch(
             this->pulse1OutBufIndex = 0;
             this->fracPulse1InBufIndex = 0;
             this->fracPulse1OutBufIndex = 0;
+            this->interrupCounter = 0;
 
             this->setupInterrupts();
             this->sleep();
@@ -533,9 +535,12 @@ void cMeasurementLoop::poll()
         fEvent = true;
         }
 
-    if (m_fInterrupt == true && this->m_fPulse1 == true)
+    if (m_fInterrupt == true)
         {
         m_fInterrupt = false;
+        gCatena.SafePrintf("Trigger Counter: %d\n", this->interrupCounter);
+        this->interrupCounter += 1;
+
         if (this->pulse1InBufIndex >= this->pulse1InBufSize)
             {
             this->resizeArray(this->m_data.pulse.Pulse1in, this->pulse1InBufSize);

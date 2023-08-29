@@ -364,6 +364,7 @@ private:
     uint64_t                        pulse1OutBufIndex;
     uint64_t                        fracPulse1InBufIndex;
     uint64_t                        fracPulse1OutBufIndex;
+    uint32_t                        interrupCounter;
 
     // second SPI class
     SPIClass                        *m_pSPI2;

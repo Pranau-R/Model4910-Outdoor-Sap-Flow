@@ -382,22 +382,6 @@ void cMeasurementLoop::updateSynchronousMeasurements()
         this->m_data.flags |= Flags::TPH;
         }
 
-    /* if (this->m_fPulse1)
-        {
-        this->m_data.pulse.Pulse1in = this->m_Pulse1P1.getcurrent();
-        this->m_Pulse1P1.getDeltaCountAndTime(this->pulse1in_dc, this->pulse1in_dt);
-        this->m_Pulse1P1.setReference();
-
-        this->m_data.pulse.Pulse1out = 0;
-        this->pulse1out_dc = 0;
-        this->pulse1out_dt = this->pulse1in_dt;
-        this->m_data.flags |= Flags::WattHours;
-
-        m_data.pulse.FracPulse1In = this->dNdT_getFrac(this->pulse1in_dc, this->pulse1in_dt);
-        m_data.pulse.FracPulse1Out = this->dNdT_getFrac(this->pulse1out_dc, this->pulse1out_dt);
-        this->m_data.flags |= Flags::PulsesPerHour;
-        } */
-
     boostPowerOff();
     }
 
@@ -578,25 +562,6 @@ void cMeasurementLoop::poll()
         this->fracPulse1OutBufIndex += 1;
 
         this->m_data.flags |= Flags::PulsesPerHour;
-
-
-
-
-
-
-        /* this->m_fInterrupt = false;
-        this->m_data.pulse.Pulse1in = this->m_Pulse1P1.getcurrent();
-        this->m_Pulse1P1.getDeltaCountAndTime(this->pulse1in_dc, this->pulse1in_dt);
-        this->m_Pulse1P1.setReference();
-
-        this->m_data.pulse.Pulse1out = 0;
-        this->pulse1out_dc = 0;
-        this->pulse1out_dt = this->pulse1in_dt;
-        this->m_data.flags |= Flags::WattHours;
-
-        m_data.pulse.FracPulse1In = this->dNdT_getFrac(this->pulse1in_dc, this->pulse1in_dt);
-        m_data.pulse.FracPulse1Out = this->dNdT_getFrac(this->pulse1out_dc, this->pulse1out_dt);
-        this->m_data.flags |= Flags::PulsesPerHour; */
         }
 
     if (this->m_fTimerActive)
